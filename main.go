@@ -70,7 +70,17 @@ func fetchRecord(w http.ResponseWriter, r *http.Request) {
 
 // updateRecord user
 func updateRecord(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Update user")
+	params := mux.Vars(r)
+
+	var user User
+
+	json.NewDecoder(r.Body).Decode(&user)
+
+	db.Model(&user).Where("ID = ?", params["ID"]).Update(&User{
+		Username: user.Username,
+		Email:    user.Email,
+	})
+
 }
 
 // deleteRecord user
@@ -103,7 +113,7 @@ func handleRequets() {
 	myRouter.HandleFunc("/create", create).Methods("POST")
 	myRouter.HandleFunc("/fetch", fetchAll).Methods("GET")
 	myRouter.HandleFunc("/fetch/{ID}", fetchRecord).Methods("GET")
-	myRouter.HandleFunc("/update/{ID}", updateRecord).Methods("PETCH")
+	myRouter.HandleFunc("/update/{ID}", updateRecord).Methods("PATCH")
 	myRouter.HandleFunc("/delete/{ID}", deleteRecord).Methods("DELETE")
 	myRouter.HandleFunc("/destroyTable", destroyTable).Methods("DELETE")
 
