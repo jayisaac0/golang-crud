@@ -5,18 +5,34 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
+	uuid "github.com/satori/go.uuid"
 )
 
 var db *gorm.DB
 var err error
 
+// Base contains common columns for all tables.
+type Base struct {
+	ID        uuid.UUID  `gorm:"type:uuid;primary_key;"`
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt time.Time  `json:"update_at"`
+	DeletedAt *time.Time `sql:"index" json:"deleted_at"`
+}
+
+// BeforeCreate will set a UUID rather than numeric ID.
+func (base *Base) BeforeCreate(scope *gorm.Scope) error {
+	uuid := uuid.NewV4()
+	return scope.SetColumn("ID", uuid)
+}
+
 // User struct
 type User struct {
-	gorm.Model
+	Base
 	Username string `json:"Username"`
 	Email    string `json:"Email"`
 	Password string `json:"Password"`
@@ -104,6 +120,8 @@ func destroyTable(w http.ResponseWriter, r *http.Request) {
 func handleRequets() {
 	myRouter := mux.NewRouter().StrictSlash(true)
 
+	// db, err = gorm.Open("postgres", os.ExpandEnv("host=${HOST} user=${USER} dbname=${DBNAME} sslmode=disable password=${PASSWORD}"))
+
 	db, err = gorm.Open("postgres", "host=localhost port=5432 user=postgres dbname=go_test_db sslmode=disable password=postgres")
 	if err != nil {
 		panic("could not connect to database")
@@ -126,7 +144,5 @@ func handleRequets() {
 
 func main() {
 	initialMigration()
-
 	handleRequets()
-
 }
