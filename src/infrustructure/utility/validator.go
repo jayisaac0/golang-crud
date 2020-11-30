@@ -22,6 +22,5 @@ func Validator(data io.ReadCloser, request interface{}, fields ...*validation.Fi
 	if verr != nil {
 		return verr
 	}
-
 	return nil
 }
