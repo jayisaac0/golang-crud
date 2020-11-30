@@ -25,21 +25,3 @@ func Validator(data io.ReadCloser, request interface{}, fields ...*validation.Fi
 
 	return nil
 }
-
-
-// func Validator(data io.ReadCloser, request interface{}, schema validation.MapRule) (interface{}, error) {
-// 	fmt.Printf("Just recieved: %v\n", request)
-// 	err := json.NewDecoder(data).Decode(request)
-
-// 	if err != nil {
-// 		return nil, fmt.Errorf("Invalid JSON body")
-// 	}
-
-// 	verr := validation.Validate(request, schema)
-
-// 	if verr != nil {
-// 		return nil, verr
-// 	}
-
-// 	return request, nil
-// }

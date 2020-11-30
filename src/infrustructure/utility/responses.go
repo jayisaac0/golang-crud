@@ -15,15 +15,15 @@ type Responses struct {
 }
 
 // ErrorResponses schema
-func (r *Responses) ErrorResponses(desc string, data []ResponseError) {
+func (r *Responses) ErrorResponses(description string, data []ResponseError) {
 	r.Status = "001"
-	r.Description = desc
+	r.Description = description
 	r.Errors = data
 }
 
 // SuccessResponse schema
-func (r *Responses) SuccessResponse(status string, desc string, data interface{}) {
+func (r *Responses) SuccessResponse(status string, description string, data interface{}) {
 	r.Status = status
-	r.Description = desc
+	r.Description = description
 	r.Data = data
 }

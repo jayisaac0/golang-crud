@@ -32,7 +32,7 @@ func Routing() http.Handler {
 
 	// Country APIs
 	userRoutes := api.PathPrefix("/user").Subrouter()
-	user := userHandler{}
+	user := UserHandler{}
 
 	userRoutes.HandleFunc("/create", user.create).Methods("POST")
 	userRoutes.HandleFunc("/fetch", user.fetchAll).Methods("GET")

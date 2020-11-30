@@ -3,12 +3,7 @@ package interfaces
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
-
-	"github.com/go-ozzo/ozzo-validation/is"
-	validation "github.com/go-ozzo/ozzo-validation/v4"
-	"github.com/jayisaac0/auth-service/src/infrustructure/utility"
 
 	"github.com/gorilla/mux"
 	"github.com/jayisaac0/auth-service/src/domain/entity"
@@ -17,8 +12,8 @@ import (
 // Users array
 type users []entity.User
 
-// usersyHandler array
-type userHandler struct{}
+// UserHandler array
+type UserHandler struct{}
 
 // initialMigration and run
 func initialMigration() {
@@ -26,32 +21,17 @@ func initialMigration() {
 	db.AutoMigrate(&entity.User{})
 }
 
-func (u *userHandler) CreateCountry(w http.ResponseWriter, r *http.Request) {
-	var request entity.User
-
-	am := utility.Validator(r.Body, &request,
-		validation.Field(&request.Username, validation.Required, validation.Length(4, 50)),
-		validation.Field(&request.Email, validation.Required, is.Email, validation.Length(4, 50)),
-		validation.Field(&request.Password, validation.Required, validation.Length(4, 50)),
-	)
-
-	if am != nil {
-		log.Printf("Something went wrong with validation: %v\n", am)
-		return
-	}
-}
-
 // create user
-func (u *userHandler) create(w http.ResponseWriter, r *http.Request) {
+func (u *UserHandler) create(w http.ResponseWriter, r *http.Request) {
 
 	var user entity.User
-	json.NewDecoder(r.Body).Decode(&user)
 
-	// err := user.Validate()
-	// if err != nil {
-	// 	json.NewEncoder(w).Encode(&err)
-	// 	return
-	// }
+	json.NewDecoder(r.Body).Decode(&user)
+	err := user.Validate()
+	if err != nil {
+		json.NewEncoder(w).Encode(&err)
+		return
+	}
 
 	db.Create(&user)
 	json.NewEncoder(w).Encode(&user)
@@ -59,7 +39,7 @@ func (u *userHandler) create(w http.ResponseWriter, r *http.Request) {
 }
 
 // fetchAll user
-func (u *userHandler) fetchAll(w http.ResponseWriter, r *http.Request) {
+func (u *UserHandler) fetchAll(w http.ResponseWriter, r *http.Request) {
 	var users []entity.User
 	db.Find(&users)
 	json.NewEncoder(w).Encode(&users)
@@ -67,7 +47,7 @@ func (u *userHandler) fetchAll(w http.ResponseWriter, r *http.Request) {
 }
 
 // fetchRecord user
-func (u *userHandler) fetchRecord(w http.ResponseWriter, r *http.Request) {
+func (u *UserHandler) fetchRecord(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	var user entity.User
 
@@ -77,49 +57,32 @@ func (u *userHandler) fetchRecord(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// db.Where("Username = ?", params["ID"]).First(&user)
 	json.NewEncoder(w).Encode(&user)
 	return
 }
 
 // updateRecord user
-func (u *userHandler) updateRecord(w http.ResponseWriter, r *http.Request) {
-	// params := mux.Vars(r)
-
-	// var updateuser UserUpdate
-	// json.NewDecoder(r.Body).Decode(&updateuser)
-
-	// err := updateuser.Validate()
-	// if err != nil {
-	// 	json.NewEncoder(w).Encode(&err)
-	// 	return
-	// }
-
-	// db.Model(&updateuser).Where("ID = ?", params["ID"]).Update(&UserUpdate{
-	// 	Username: updateuser.Username,
-	// 	Email:    updateuser.Email,
-	// })
-	// return
-
+func (u *UserHandler) updateRecord(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
 	var user entity.User
-	// var updateuser UserUpdate
+	var updateuser entity.UserUpdate
 
-	json.NewDecoder(r.Body).Decode(&user)
+	json.NewDecoder(r.Body).Decode(&updateuser)
 
-	// err := user.Validate()
-	// if err != nil {
-	// 	json.NewEncoder(w).Encode(&err)
-	// 	return
-	// }
+	err := updateuser.Validate()
+	if err != nil {
+		json.NewEncoder(w).Encode(&err)
+		return
+	}
 
-	db.Model(&user).Where("ID = ?", params["ID"]).Update(&user)
+	db.Model(&user).Where("ID = ?", params["ID"]).Update(&updateuser)
+	json.NewEncoder(w).Encode("Record updated")
 	return
 }
 
 // deleteRecord user
-func (u *userHandler) deleteRecord(w http.ResponseWriter, r *http.Request) {
+func (u *UserHandler) deleteRecord(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	var user entity.User
 
